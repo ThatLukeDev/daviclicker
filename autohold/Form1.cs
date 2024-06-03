@@ -15,6 +15,7 @@ namespace autohold
     public partial class Form1 : Form
     {
         bool autoclicking = false;
+        bool cooldown = false;
         int interval = 10;
         IntPtr lParamD = IntPtr.Zero;
         IntPtr lParamU = IntPtr.Zero;
@@ -66,7 +67,7 @@ namespace autohold
                     {
                         lParamD = lParam;
                     }
-                    if (enabled.Checked)
+                    if (enabled.Checked && !cooldown)
                     {
                         autoclicking = true;
                     }
@@ -82,6 +83,7 @@ namespace autohold
                         lParamU = lParam;
                     }
                     autoclicking = false;
+                    cooldown = true;
                 }
             }
 
@@ -106,6 +108,7 @@ namespace autohold
 
         Timer secondInterval;
         Timer msInterval;
+        Timer cdInterval;
 
         private void secondInterval_Tick(object sender, EventArgs e)
         {
@@ -116,10 +119,15 @@ namespace autohold
 
         private void msInterval_Tick(object sender, EventArgs e)
         {
-            if (autoclicking)
+            if (autoclicking && enabled.Checked)
             {
                 Click(5);
             }
+        }
+
+        private void cdInterval_Tick(object sender, EventArgs e)
+        {
+            cooldown = false;
         }
 
         public Form1()
@@ -134,6 +142,10 @@ namespace autohold
             msInterval.Tick += new EventHandler(msInterval_Tick);
             msInterval.Interval = interval;
             msInterval.Start();
+            cdInterval = new Timer();
+            cdInterval.Tick += new EventHandler(cdInterval_Tick);
+            cdInterval.Interval = 50;
+            cdInterval.Start();
         }
 
         private void tester_Click(object sender, EventArgs e)
